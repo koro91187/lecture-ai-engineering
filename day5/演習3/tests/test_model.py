@@ -108,6 +108,19 @@ def test_model_exists():
         pytest.skip("モデルファイルが存在しないためスキップします")
     assert os.path.exists(MODEL_PATH), "モデルファイルが存在しません"
 
+def _load_baseline() -> float | None:
+    """baseline.json から accuracy を読む（無ければ None）"""
+    if BASELINE_PATH.exists():
+        data = json.loads(BASELINE_PATH.read_text())
+        return data.get("accuracy")
+    return None
+
+def _save_baseline(new_acc: float):
+    """精度が向上したとき baseline.json を更新"""
+    BASELINE_PATH.write_text(json.dumps(
+        {"accuracy": new_acc, "updated": datetime.utcnow().isoformat()},
+        indent=2
+    ))
 
 def test_model_accuracy(train_model):
     """モデルの精度を検証"""
